@@ -38,17 +38,6 @@ Create a GitHub issue.
 
 Read it as in **Read an issue** above.
 
-## Wayfinding operations
-
-Used by `/wayfinder`. The **map** is a single issue with **child** issues as tickets.
-
-- **Map**: a single issue labelled `wayfinder:map`, holding the Notes / Decisions-so-far / Fog body. `gh issue create --label wayfinder:map`.
-- **Child ticket**: an issue linked to the map as a GitHub sub-issue (see **Make an issue a sub-issue of a parent**). Where sub-issues aren't enabled, add the child to a task list in the map body and put `Part of #<map>` at the top of the child body. Labels: `wayfinder:<type>` (`research`/`prototype`/`grilling`/`task`). Once claimed, the ticket is assigned to the driving dev.
-- **Blocking**: see **Blocking** under Conventions.
-- **Frontier query**: list the map's open children (`gh issue list --state open`, scoped to the map's sub-issues / task list), drop any with an open blocker (see **Count open blockers**, or an open issue in the `Blocked by` line) or an assignee; first in map order wins.
-- **Claim**: `gh issue edit <n> --add-assignee @me`, the session's first write.
-- **Resolve**: `gh issue comment <n> --body "<answer>"`, then `gh issue close <n>`, then append a context pointer (gist + link) to the map's Decisions-so-far.
-
 ## 이 저장소의 규칙
 
 `AGENTS.md`가 이 파일보다 먼저다.
@@ -56,3 +45,4 @@ Used by `/wayfinder`. The **map** is a single issue with **child** issues as tic
 - 공개 저장소다. 이슈와 댓글에 우선순위·일정·내부 판단을 쓰지 않는다.
 - 취약점은 이슈로 받지 않는다. `SECURITY.md`의 비공개 보고 경로를 쓴다.
 - PR 본문에는 닫는 이슈를 `Fixes #<번호>`로 적는다.
+- `/wayfinder`는 쓰지 않는다. 결정 기록을 공개 이슈에 쌓고, 이 저장소에 없는 `wayfinder:*` 라벨을 쓰기 때문이다.
