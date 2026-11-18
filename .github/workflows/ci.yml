@@ -33,6 +33,6 @@ jobs:
           persist-credentials: false
       # AGENTS.md lists check and test as N/A until the Rails app exists; that PR replaces these steps.
       - name: check
-        run: echo "N/A in AGENTS.md: no code yet"
+        run: echo "N/A in AGENTS.md - no code yet"
       - name: test
-        run: echo "N/A in AGENTS.md: no code yet"
+        run: echo "N/A in AGENTS.md - no code yet"
