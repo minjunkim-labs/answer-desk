@@ -18,7 +18,7 @@
 
 ## 민감한 파일
 
-되돌리기 어려움이거나 이 경로를 건드리면 보안 관점의 리뷰를 더한다: `.github/workflows/**`, 저장소·CI 설정, 의존성 manifest·lockfile, 에이전트 설정 폴더(`.claude/`·`.agents/`·`.codex/`·`.cursor/` 같은 폴더와 그 안의 모든 파일, 하위 폴더에 있는 것 포함)와 `.mcp.json`, `db/migrate/**`(데이터 구조), `config/credentials*`·`config/master.key`(비밀값), `app/controllers/operator/**`(운영자 콘솔·인증).
+관리 블록의 기본 민감한 파일에 더해: `db/migrate/**`(데이터 구조), `config/credentials*`·`config/master.key`(비밀값), `app/controllers/operator/**`(운영자 콘솔·인증).
 
 ## 배운 규칙
 

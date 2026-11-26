@@ -21,6 +21,10 @@
 | `.mise.toml` | 툴체인 판. `run`이 이 판으로 돈다 |
 | `REVIEW.md` | 리뷰 기준. 리뷰할 때만 읽는다 |
 
+## 이 저장소의 규칙
+
+- `.env.example`은 비밀값 파일이 아니다. `docs/agents/ops.md`대로 빈 칸만 두고 커밋한다.
+
 ## Agent skills
 
 ### Issue tracker
