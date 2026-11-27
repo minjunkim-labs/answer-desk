@@ -37,6 +37,7 @@ jobs:
           persist-credentials: false
       - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
       # The Rails app (ADR 0002) needs one PostgreSQL for app data and the Solid Queue tables.
+      # Keep the major version the same on both runners (ubuntu-24.04 ships 16).
       - name: start PostgreSQL
         run: |
           case "$RUNNER_OS" in
@@ -45,9 +46,9 @@ jobs:
               sudo -u postgres createuser --superuser "$USER"
               ;;
             macOS)
-              brew install postgresql@17
-              brew services start postgresql@17
-              echo "$(brew --prefix postgresql@17)/bin" >> "$GITHUB_PATH"
+              brew install postgresql@16
+              brew services start postgresql@16
+              echo "$(brew --prefix postgresql@16)/bin" >> "$GITHUB_PATH"
               ;;
           esac
       - name: wait for PostgreSQL

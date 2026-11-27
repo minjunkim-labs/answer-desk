@@ -8,5 +8,6 @@
 ## 개발 환경
 
 - 툴체인: [mise](https://mise.jdx.dev)가 `.mise.toml`의 Ruby를 설치한다.
-- PostgreSQL이 떠 있어야 한다. 연결은 로컬 소켓이 기본이고 `DATABASE_URL`이나 `PGHOST`/`PGUSER`로 바꾼다.
+- PostgreSQL이 떠 있어야 한다. 연결은 로컬 소켓이 기본이고 `PGHOST`/`PGUSER`/`PGPASSWORD`로 바꾼다. `DATABASE_URL`은 개발과 시험이 같은 데이터베이스를 쓰게 되므로 쓰지 않는다.
+- 시험은 migration을 처음부터 돌려 `db/schema.rb`와 같은지 확인한 뒤 시작한다. migration을 바꾸면 `db/schema.rb`도 함께 커밋한다.
 - 명령은 [AGENTS.md](AGENTS.md)의 「명령」 칸과 같다: `python3 -I .baseline/baseline.py run setup|check|test`.
