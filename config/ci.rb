@@ -1,6 +1,7 @@
 # Run using bin/ci
 
 CI.run do
+  step "PostgreSQL", "bin/pg install && bin/pg start"
   step "Setup", "bin/setup --skip-server"
 
   step "Style: Ruby", "bin/rubocop"
