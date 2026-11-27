@@ -6,10 +6,10 @@
 
 모든 에이전트와 사람이 같은 명령을 쓴다. 없는 칸은 `N/A: <이유>`다.
 
-- setup: `N/A: 아직 코드가 없다. Rails 앱을 만드는 PR이 채운다`
-- check: `N/A: 아직 코드가 없다. Rails 앱을 만드는 PR이 채운다`
-- test: `N/A: 아직 코드가 없다. Rails 앱을 만드는 PR이 채운다`
-- build: `N/A: 아직 코드가 없다. Rails 앱을 만드는 PR이 채운다`
+- setup: `sh -c 'BUNDLE_FROZEN=true bundle install'`
+- check: `sh -c 'bundle exec rubocop && bundle exec brakeman --quiet --no-pager'`
+- test: `sh -c 'RAILS_ENV=test bin/rails db:prepare && bin/rails test'`
+- build: `N/A: 배포 산출물이 아직 없다. 배포를 정하는 PR이 채운다`
 
 ## 길잡이
 
