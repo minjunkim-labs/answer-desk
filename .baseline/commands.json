@@ -1,6 +1,22 @@
 {
-  "build": "N/A: 아직 코드가 없다. Rails 앱을 만드는 PR이 채운다",
-  "check": "N/A: 아직 코드가 없다. Rails 앱을 만드는 PR이 채운다",
-  "setup": "N/A: 아직 코드가 없다. Rails 앱을 만드는 PR이 채운다",
-  "test": "N/A: 아직 코드가 없다. Rails 앱을 만드는 PR이 채운다"
+  "build": [
+    "sh",
+    "-c",
+    "SECRET_KEY_BASE_DUMMY=1 RAILS_ENV=production bin/rails assets:precompile"
+  ],
+  "check": [
+    "sh",
+    "-c",
+    "bin/rubocop && bin/brakeman --quiet --no-pager --exit-on-warn --exit-on-error"
+  ],
+  "setup": [
+    "sh",
+    "-c",
+    "bin/pg start && bin/setup --skip-server"
+  ],
+  "test": [
+    "sh",
+    "-c",
+    "bin/pg start && bin/rails test"
+  ]
 }

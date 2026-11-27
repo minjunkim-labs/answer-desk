@@ -6,3 +6,18 @@
 *.key
 *.p12
 .DS_Store
+
+# Rails
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
+/storage/*
+!/storage/.keep
+/public/assets
+/node_modules
+config/master.key
+/coverage/
+.bundle
+/vendor/bundle
+.serena/

@@ -1,0 +1,83 @@
+#!/bin/sh
+# 개발·시험용 PostgreSQL을 프로젝트 안(tmp/pg)에 띄우고 끈다. 사용법: bin/pg start|stop|status
+# 서버 바이너리(initdb, pg_ctl)는 PATH, Homebrew, /usr/lib/postgresql에서 찾는다. 설치는 하지 않는다.
+# 소켓으로만 받고(TCP 없음) 시험용이라 인증은 없다. config/database.yml의 기본값과 같은 위치·포트(5439)다.
+# PGHOST를 정했다면 다른 서버를 쓰는 것이므로 아무것도 하지 않는다.
+set -eu
+
+root=$(cd "$(dirname "$0")/.." && pwd)
+dir="$root/tmp/pg"
+data="$dir/data"
+port="${PGPORT:-5439}"
+
+find_bin() {
+  if command -v pg_ctl >/dev/null 2>&1 && command -v initdb >/dev/null 2>&1; then
+    dirname "$(command -v pg_ctl)"
+    return
+  fi
+  for candidate in \
+    /usr/lib/postgresql/*/bin \
+    /opt/homebrew/opt/postgresql@*/bin \
+    /usr/local/opt/postgresql@*/bin \
+    /opt/homebrew/bin /usr/local/bin; do
+    if [ -x "$candidate/pg_ctl" ] && [ -x "$candidate/initdb" ]; then
+      echo "$candidate"
+      return
+    fi
+  done
+  echo "bin/pg: PostgreSQL 서버(pg_ctl, initdb)를 찾지 못했다. 설치한 뒤 다시 돌린다." >&2
+  exit 1
+}
+
+if [ -n "${PGHOST:-}" ]; then
+  echo "bin/pg: PGHOST가 정해져 있어 프로젝트 DB를 띄우지 않는다."
+  exit 0
+fi
+
+# 유닉스 소켓 경로는 100자 안팎이 한계다.
+if [ "${#dir}" -gt 80 ]; then
+  echo "bin/pg: 경로가 길어 소켓을 만들 수 없다: $dir" >&2
+  exit 1
+fi
+
+pg_bin=$(find_bin)
+
+running() {
+  "$pg_bin/pg_ctl" -D "$data" status >/dev/null 2>&1
+}
+
+case "${1:-}" in
+  start)
+    if running; then
+      echo "bin/pg: 이미 돌고 있다 ($dir)"
+      exit 0
+    fi
+    if [ ! -f "$data/PG_VERSION" ]; then
+      mkdir -p "$dir"
+      "$pg_bin/initdb" -D "$data" --auth=trust --encoding=UTF8 --locale=C >/dev/null
+    fi
+    "$pg_bin/pg_ctl" -D "$data" -l "$dir/server.log" -w \
+      -o "-p $port -k $dir -c listen_addresses=''" start >/dev/null
+    echo "bin/pg: 시작했다 ($dir, 포트 $port)"
+    ;;
+  stop)
+    if running; then
+      "$pg_bin/pg_ctl" -D "$data" -m fast -w stop >/dev/null
+      echo "bin/pg: 멈췄다"
+    else
+      echo "bin/pg: 돌고 있지 않다"
+    fi
+    ;;
+  status)
+    if running; then
+      echo "bin/pg: 돌고 있다 ($dir, 포트 $port)"
+    else
+      echo "bin/pg: 돌고 있지 않다"
+      exit 1
+    fi
+    ;;
+  *)
+    echo "사용법: bin/pg start|stop|status" >&2
+    exit 2
+    ;;
+esac

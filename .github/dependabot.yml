@@ -18,3 +18,14 @@ updates:
       codeql-action:
         patterns:
           - "github/codeql-action/*"
+  # Rails 앱의 gem(Gemfile.lock). 새로 나온 버전은 일주일 기다린다.
+  - package-ecosystem: bundler
+    directory: /
+    schedule:
+      interval: weekly
+    labels: [dependencies]
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: chore
+      include: scope
