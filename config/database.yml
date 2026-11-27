@@ -1,0 +1,21 @@
+# PostgreSQL. 앱 데이터와 Solid Queue 테이블은 같은 데이터베이스에 둔다(ADR 0002).
+# 연결 정보는 DATABASE_URL 또는 PGHOST/PGUSER/PGPASSWORD로 덮어쓴다.
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  max_connections: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+development:
+  <<: *default
+  database: answer_desk_development
+
+# 아래 test 데이터베이스는 `bin/rails db:test:prepare`나 `db:prepare`가 만든다.
+test:
+  <<: *default
+  database: answer_desk_test
+
+production:
+  <<: *default
+  database: answer_desk_production
+  username: <%= ENV.fetch("PGUSER", "answer_desk").to_json %>
+  password: <%= ENV["ANSWER_DESK_DATABASE_PASSWORD"] %>

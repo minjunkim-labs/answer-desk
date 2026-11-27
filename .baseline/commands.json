@@ -1,6 +1,18 @@
 {
-  "build": "N/A: 아직 코드가 없다. Rails 앱을 만드는 PR이 채운다",
-  "check": "N/A: 아직 코드가 없다. Rails 앱을 만드는 PR이 채운다",
-  "setup": "N/A: 아직 코드가 없다. Rails 앱을 만드는 PR이 채운다",
-  "test": "N/A: 아직 코드가 없다. Rails 앱을 만드는 PR이 채운다"
+  "build": "N/A: 배포 산출물이 아직 없다. 배포를 정하는 PR이 채운다",
+  "check": [
+    "sh",
+    "-c",
+    "bundle exec rubocop && bundle exec brakeman --quiet --no-pager"
+  ],
+  "setup": [
+    "sh",
+    "-c",
+    "BUNDLE_FROZEN=true bundle install"
+  ],
+  "test": [
+    "sh",
+    "-c",
+    "mkdir -p tmp && rm -f tmp/schema.rb.migrated && RAILS_ENV=test SCHEMA=tmp/schema.rb.migrated bin/rails db:drop db:create db:migrate && diff -u db/schema.rb tmp/schema.rb.migrated && bin/rails test"
+  ]
 }
