@@ -6,7 +6,7 @@
 
 모든 에이전트와 사람이 같은 명령을 쓴다. 없는 칸은 `N/A: <이유>`다.
 
-- setup: `sh -c 'bin/pg start && bin/setup --skip-server'`
+- setup: `sh -c 'bin/pg install && bin/pg start && bin/setup --skip-server'`
 - check: `sh -c 'bin/rubocop && bin/brakeman --quiet --no-pager --exit-on-warn --exit-on-error'`
 - test: `sh -c 'bin/pg start && bin/rails test'`
 - build: `sh -c 'SECRET_KEY_BASE_DUMMY=1 RAILS_ENV=production bin/rails assets:precompile'`

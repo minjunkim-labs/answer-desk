@@ -9,4 +9,4 @@
 
 명령은 [AGENTS.md](AGENTS.md)의 setup, check, test, build와 같습니다. `python3 -I .baseline/baseline.py run test`처럼 부릅니다(Ruby는 `.mise.toml`이 고정하고 mise가 설치합니다).
 
-PostgreSQL 서버(`initdb`, `pg_ctl`)는 mise가 아니라 시스템에 설치되어 있어야 합니다. `bin/pg start`가 프로젝트 안(`tmp/pg`)에 시험용 서버를 소켓으로만 띄웁니다. 다른 서버를 쓰려면 `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`를 정합니다.
+PostgreSQL 서버(`initdb`, `pg_ctl`)는 mise가 아니라 시스템에 설치합니다. setup이 `bin/pg install`로 확인하고(macOS는 Homebrew로 `postgresql@16`을 설치, 그 밖에는 안내만), `bin/pg start`가 프로젝트 안(`tmp/pg`)에 시험용 서버를 소켓으로만 띄웁니다. 다른 서버를 쓰려면 `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`를 정합니다.

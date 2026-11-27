@@ -1,37 +1,76 @@
 #!/bin/sh
-# 개발·시험용 PostgreSQL을 프로젝트 안(tmp/pg)에 띄우고 끈다. 사용법: bin/pg start|stop|status
-# 서버 바이너리(initdb, pg_ctl)는 PATH, Homebrew, /usr/lib/postgresql에서 찾는다. 설치는 하지 않는다.
-# 소켓으로만 받고(TCP 없음) 시험용이라 인증은 없다. config/database.yml의 기본값과 같은 위치·포트(5439)다.
-# PGHOST를 정했다면 다른 서버를 쓰는 것이므로 아무것도 하지 않는다.
+# 개발·시험용 PostgreSQL을 프로젝트 안(tmp/pg)에 띄우고 끈다.
+# 사용법: bin/pg install|bindir|start|stop|status
+#   install  서버 바이너리(initdb, pg_ctl)가 없으면 macOS에서 Homebrew로 postgresql@16을 설치한다. 그 밖에는 안내만 한다.
+#   bindir   쓸 서버 바이너리 디렉터리를 출력한다(없으면 빈 출력). pg gem이 pg_config를 찾게 bin/setup이 쓴다.
+# 바이너리는 PATH, 다음으로 /usr/lib/postgresql, Homebrew에서 찾는다(여러 판이면 가장 높은 판).
+# 소켓으로만 받고(TCP 없음) 시험용이라 인증은 없다. 그래서 tmp/pg와 소켓은 이 사용자만 쓴다.
+# config/database.yml의 기본값과 같은 위치·포트(5439)다. PGHOST를 정했다면 다른 서버를 쓰는 것이므로
+# install, start, stop, status는 아무것도 하지 않는다.
 set -eu
 
 root=$(cd "$(dirname "$0")/.." && pwd)
 dir="$root/tmp/pg"
 data="$dir/data"
 port="${PGPORT:-5439}"
+brew_formula="postgresql@16"
 
+# 바이너리 디렉터리를 출력한다. 없으면 아무것도 출력하지 않는다.
 find_bin() {
   if command -v pg_ctl >/dev/null 2>&1 && command -v initdb >/dev/null 2>&1; then
     dirname "$(command -v pg_ctl)"
-    return
+    return 0
   fi
+  found=""
   for candidate in \
     /usr/lib/postgresql/*/bin \
     /opt/homebrew/opt/postgresql@*/bin \
-    /usr/local/opt/postgresql@*/bin \
-    /opt/homebrew/bin /usr/local/bin; do
+    /usr/local/opt/postgresql@*/bin; do
     if [ -x "$candidate/pg_ctl" ] && [ -x "$candidate/initdb" ]; then
-      echo "$candidate"
-      return
+      found="$candidate"
     fi
   done
-  echo "bin/pg: PostgreSQL 서버(pg_ctl, initdb)를 찾지 못했다. 설치한 뒤 다시 돌린다." >&2
-  exit 1
+  if [ -n "$found" ]; then
+    echo "$found"
+  fi
 }
 
+case "${1:-}" in
+  bindir)
+    find_bin
+    exit 0
+    ;;
+  install | start | stop | status) ;;
+  *)
+    echo "사용법: bin/pg install|bindir|start|stop|status" >&2
+    exit 2
+    ;;
+esac
+
 if [ -n "${PGHOST:-}" ]; then
-  echo "bin/pg: PGHOST가 정해져 있어 프로젝트 DB를 띄우지 않는다."
+  echo "bin/pg: PGHOST가 정해져 있어 프로젝트 DB를 쓰지 않는다."
   exit 0
+fi
+
+pg_bin=$(find_bin)
+
+if [ "$1" = install ]; then
+  if [ -n "$pg_bin" ]; then
+    echo "bin/pg: PostgreSQL 서버가 이미 있다 ($pg_bin)"
+    exit 0
+  fi
+  if [ "$(uname -s)" = Darwin ] && command -v brew >/dev/null 2>&1; then
+    echo "bin/pg: PostgreSQL 서버를 찾지 못해 brew install $brew_formula 를 돌린다."
+    brew install "$brew_formula"
+    exit 0
+  fi
+  echo "bin/pg: PostgreSQL 서버(pg_ctl, initdb)를 찾지 못했다. macOS는 brew install $brew_formula, Debian·Ubuntu는 apt install postgresql 로 설치한 뒤 다시 돌린다." >&2
+  exit 1
+fi
+
+if [ -z "$pg_bin" ]; then
+  echo "bin/pg: PostgreSQL 서버(pg_ctl, initdb)를 찾지 못했다. bin/pg install 을 먼저 돌린다." >&2
+  exit 1
 fi
 
 # 유닉스 소켓 경로는 100자 안팎이 한계다.
@@ -46,13 +85,11 @@ case "$dir" in
     ;;
 esac
 
-pg_bin=$(find_bin)
-
 running() {
   "$pg_bin/pg_ctl" -D "$data" status >/dev/null 2>&1
 }
 
-case "${1:-}" in
+case "$1" in
   start)
     if running; then
       echo "bin/pg: 이미 돌고 있다 ($dir)"
@@ -61,7 +98,14 @@ case "${1:-}" in
     mkdir -p "$dir"
     # 소켓과 로그는 이 사용자만 쓴다.
     chmod 700 "$dir"
-    if [ ! -f "$data/PG_VERSION" ]; then
+    if [ -f "$data/PG_VERSION" ]; then
+      have=$(cat "$data/PG_VERSION")
+      want=$("$pg_bin/postgres" --version | sed 's/^[^0-9]*\([0-9][0-9]*\).*/\1/')
+      if [ "$have" != "$want" ]; then
+        echo "bin/pg: 데이터 디렉터리는 PostgreSQL $have 판인데 찾은 서버는 $want 판이다. 시험용 데이터라면 rm -rf $data 후 다시 돌린다." >&2
+        exit 1
+      fi
+    else
       "$pg_bin/initdb" -D "$data" --auth=trust --encoding=UTF8 --locale=C >/dev/null
     fi
     # pg_ctl은 -o를 셸로 넘기므로 경로를 따옴표로 감싼다.
@@ -84,9 +128,5 @@ case "${1:-}" in
       echo "bin/pg: 돌고 있지 않다"
       exit 1
     fi
-    ;;
-  *)
-    echo "사용법: bin/pg start|stop|status" >&2
-    exit 2
     ;;
 esac

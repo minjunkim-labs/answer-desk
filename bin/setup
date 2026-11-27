@@ -12,6 +12,10 @@ FileUtils.chdir APP_ROOT do
   # This script is idempotent, so that you can run it at any time and get an expectable outcome.
   # Add necessary setup steps to this file.
 
+  # pg gem이 pg_config를 찾게 bin/pg가 고른 PostgreSQL의 bin을 PATH 앞에 둔다(Homebrew의 postgresql@16은 PATH에 없다).
+  pg_bin = `bin/pg bindir`.strip
+  ENV["PATH"] = [ pg_bin, ENV["PATH"] ].reject(&:empty?).join(File::PATH_SEPARATOR) unless pg_bin.empty?
+
   puts "== Installing dependencies =="
   system("bundle check") || system!("bundle install")
 

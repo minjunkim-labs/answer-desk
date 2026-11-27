@@ -15,7 +15,7 @@ class QueueSingleDatabaseTest < ActiveSupport::TestCase
     assert SolidQueue::Job.table_exists?
   end
 
-  test "an enqueued job is stored in the primary database" do
+  test "a job enqueued with the Solid Queue adapter becomes a SolidQueue::Job row" do
     original = ProbeJob.queue_adapter
     ProbeJob.queue_adapter = :solid_queue
 

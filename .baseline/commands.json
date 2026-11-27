@@ -12,7 +12,7 @@
   "setup": [
     "sh",
     "-c",
-    "bin/pg start && bin/setup --skip-server"
+    "bin/pg install && bin/pg start && bin/setup --skip-server"
   ],
   "test": [
     "sh",
