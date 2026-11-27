@@ -39,6 +39,12 @@ if [ "${#dir}" -gt 80 ]; then
   echo "bin/pg: 경로가 길어 소켓을 만들 수 없다: $dir" >&2
   exit 1
 fi
+case "$dir" in
+  *\'*)
+    echo "bin/pg: 작은따옴표가 든 경로는 쓸 수 없다: $dir" >&2
+    exit 1
+    ;;
+esac
 
 pg_bin=$(find_bin)
 
@@ -52,12 +58,15 @@ case "${1:-}" in
       echo "bin/pg: 이미 돌고 있다 ($dir)"
       exit 0
     fi
+    mkdir -p "$dir"
+    # 소켓과 로그는 이 사용자만 쓴다.
+    chmod 700 "$dir"
     if [ ! -f "$data/PG_VERSION" ]; then
-      mkdir -p "$dir"
       "$pg_bin/initdb" -D "$data" --auth=trust --encoding=UTF8 --locale=C >/dev/null
     fi
+    # pg_ctl은 -o를 셸로 넘기므로 경로를 따옴표로 감싼다.
     "$pg_bin/pg_ctl" -D "$data" -l "$dir/server.log" -w \
-      -o "-p $port -k $dir -c listen_addresses=''" start >/dev/null
+      -o "-p $port -k '$dir' -c listen_addresses='' -c unix_socket_permissions=0700" start >/dev/null
     echo "bin/pg: 시작했다 ($dir, 포트 $port)"
     ;;
   stop)
