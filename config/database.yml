@@ -17,5 +17,5 @@ test:
 production:
   <<: *default
   database: answer_desk_production
-  username: answer_desk
+  username: <%= ENV.fetch("PGUSER", "answer_desk") %>
   password: <%= ENV["ANSWER_DESK_DATABASE_PASSWORD"] %>

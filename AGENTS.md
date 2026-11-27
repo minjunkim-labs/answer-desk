@@ -8,7 +8,7 @@
 
 - setup: `sh -c 'BUNDLE_FROZEN=true bundle install'`
 - check: `sh -c 'bundle exec rubocop && bundle exec brakeman --quiet --no-pager'`
-- test: `sh -c 'RAILS_ENV=test bin/rails db:drop db:create db:migrate && git diff --exit-code db/schema.rb && bin/rails test'`
+- test: `sh -c 'mkdir -p tmp && rm -f tmp/schema.rb.migrated && RAILS_ENV=test SCHEMA=tmp/schema.rb.migrated bin/rails db:drop db:create db:migrate && diff -u db/schema.rb tmp/schema.rb.migrated && bin/rails test'`
 - build: `N/A: 배포 산출물이 아직 없다. 배포를 정하는 PR이 채운다`
 
 ## 길잡이
